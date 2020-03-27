@@ -57,7 +57,7 @@ public class RouteResource {
     private String connectionString = "jdbc:postgresql://" + System.getenv("POSTGRES_HOST")
             + "/" + System.getenv("POSTGRES_DB")
             + "?user=" + System.getenv("POSTGRES_USER")
-            + "&password" + System.getenv("POSTGRES_PASSWORD");
+            + "&password=" + System.getenv("POSTGRES_PASSWORD");
 
     private final GraphHopperAPI graphHopper;
     private final Boolean hasElevation;
@@ -100,7 +100,7 @@ public class RouteResource {
         Connection conn = DriverManager.getConnection(connectionString);
         PreparedStatement statement = conn.prepareStatement("SELECT * FROM authtoken_token WHERE key = ?");
         statement.setString(1, authToken);
-        boolean exists = statement.executeQuery().first();
+        boolean exists = statement.executeQuery().next();
         if (!exists) {
             throw new NotAuthorizedException("Authorization token does not exist or is invalid");
         }

@@ -2,6 +2,8 @@ version: '3'
 services:
   graphhopper:
     build: .
+    ports:
+      - 8989:8989
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_DB=shnake
@@ -9,8 +11,6 @@ services:
       - POSTGRES_PASSWORD=root
   db:
     image: postgres:alpine
-    volumes:
-      - ./db:/var/lib/mysql
     environment:
       - POSTGRES_DB=shnake
       - POSTGRES_USER=root
