@@ -78,7 +78,7 @@ if [ -z $ACTION ]; then
 fi
 
 if [ -z $FILE ]; then
-  FILE=${REMAINING_ARGS[1]}
+  FILE=${REMAINING_ARGS[1]}  # "/data/europe_germany_berlin.pbf"
 fi
 
 if [ "$ACTION" = "" ]; then
@@ -197,9 +197,9 @@ DATADIR=$(dirname "${FILE}")
 # create the directories if needed
 mkdir -p $DATADIR
 # BASENAME = filename (file without the directories)
-BASENAME=$(basename "${FILE}")
+BASENAME=$(basename "${FILE}")  # "europe_germany_berlin.pbf"
 # NAME = file without extension if any
-NAME="${BASENAME%.*}"
+NAME="${BASENAME%.*}"  # "europe_germany_berlin"
 
 if [ "$FILE" == "-" ]; then
    OSM_FILE=
@@ -220,7 +220,7 @@ else
    OSM_FILE=
 fi
 
-LINK=$(echo $NAME | tr '_' '/')
+LINK=$(echo $NAME | tr '_' '/')  # europe/germany/berlin
 if [ "$FILE" == "-" ]; then
    LINK=
 elif [ ${FILE: -4} == ".osm" ]; then 
