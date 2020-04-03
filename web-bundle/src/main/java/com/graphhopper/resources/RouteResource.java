@@ -37,10 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 import static com.graphhopper.util.Parameters.Details.PATH_DETAILS;
 import static com.graphhopper.util.Parameters.Routing.*;
@@ -56,6 +54,10 @@ import static com.graphhopper.util.Parameters.Routing.*;
 public class RouteResource {
 
     private static final Logger logger = LoggerFactory.getLogger(RouteResource.class);
+    private String connectionString = "jdbc:postgresql://" + System.getenv("POSTGRES_HOST")
+            + "/" + System.getenv("POSTGRES_DB")
+            + "?user=" + System.getenv("POSTGRES_USER")
+            + "&password=" + System.getenv("POSTGRES_PASSWORD");
 
     private final GraphHopperAPI graphHopper;
     private final Boolean hasElevation;
@@ -72,6 +74,7 @@ public class RouteResource {
             @Context HttpServletRequest httpReq,
             @Context UriInfo uriInfo,
             @Context ContainerRequestContext rc,
+            @HeaderParam("Authorization") String authToken,
             @QueryParam(WAY_POINT_MAX_DISTANCE) @DefaultValue("1") double minPathPrecision,
             @QueryParam("point") List<GHPoint> requestPoints,
             @QueryParam("type") @DefaultValue("json") String type,
@@ -92,7 +95,16 @@ public class RouteResource {
             @QueryParam("gpx.track") @DefaultValue("true") boolean withTrack,
             @QueryParam("gpx.waypoints") @DefaultValue("false") boolean withWayPoints,
             @QueryParam("gpx.trackname") @DefaultValue("GraphHopper Track") String trackName,
-            @QueryParam("gpx.millis") String timeString) {
+            @QueryParam("gpx.millis") String timeString) throws SQLException {
+
+        Connection conn = DriverManager.getConnection(connectionString);
+        PreparedStatement statement = conn.prepareStatement("SELECT * FROM authtoken_token WHERE key = ?");
+        statement.setString(1, authToken);
+        boolean exists = statement.executeQuery().next();
+        if (!exists) {
+            throw new NotAuthorizedException("Authorization token does not exist or is invalid");
+        }
+
         boolean writeGPX = "gpx".equalsIgnoreCase(type);
         instructions = writeGPX || instructions;
 
